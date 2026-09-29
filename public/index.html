@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevLore | Team Memory Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-base: #050505;
+            --glass-bg: rgba(20, 20, 25, 0.4);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --text-primary: #ffffff;
+            --text-secondary: #a1a1aa;
+            --accent-1: #3b82f6; /* Blue */
+            --accent-2: #8b5cf6; /* Purple */
+            --accent-3: #ec4899; /* Pink */
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-base);
+            color: var(--text-primary);
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Animated Background Orbs */
+        .bg-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(100px);
+            z-index: -1;
+            animation: float 20s infinite alternate ease-in-out;
+        }
+        .orb-1 { width: 500px; height: 500px; background: rgba(59, 130, 246, 0.3); top: -100px; left: -100px; }
+        .orb-2 { width: 400px; height: 400px; background: rgba(139, 92, 246, 0.3); bottom: -100px; right: 10%; animation-delay: -5s; }
+        .orb-3 { width: 300px; height: 300px; background: rgba(236, 72, 153, 0.2); top: 30%; left: 40%; animation-delay: -10s; }
+
+        @keyframes float {
+            0% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(50px, 50px) scale(1.1); }
+            100% { transform: translate(-50px, 100px) scale(0.9); }
+        }
+
+        /* Sidebar Styling (Heavy Glassmorphism) */
+        .sidebar {
+            width: 280px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border-right: 1px solid var(--glass-border);
+            display: flex;
+            flex-direction: column;
+            padding: 30px 0;
+            z-index: 10;
+        }
+
+        /* Animated Logo */
+        .brand {
+            padding: 0 30px 30px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .brand h1 {
+            font-size: 2.8rem;
+            font-weight: 900;
+            letter-spacing: -1px;
+            background: linear-gradient(to right, #60a5fa, #c084fc, #f472b6);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shine 3s linear infinite;
+            filter: drop-shadow(0 0 15px rgba(139, 92, 246, 0.4));
+        }
+
+        @keyframes shine {
+            to { background-position: 200% center; }
+        }
+
+        .nav-item {
+            padding: 16px 30px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 1.1rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            position: relative;
+        }
+
+        .nav-item::before {
+            content: '';
+            position: absolute;
+            left: 0; top: 0; bottom: 0; width: 0;
+            background: linear-gradient(90deg, rgba(139, 92, 246, 0.2), transparent);
+            transition: width 0.3s ease;
+            z-index: -1;
+        }
+
+        .nav-item:hover::before, .nav-item.active::before {
+            width: 100%;
+        }
+
+        .nav-item:hover { color: white; transform: translateX(5px); }
+        .nav-item.active { color: white; border-right: 4px solid var(--accent-2); }
+
+        /* Main Content */
+        .main-content {
+            flex-grow: 1;
+            padding: 60px;
+            overflow-y: auto;
+            z-index: 10;
+        }
+
+        .header h2 { font-size: 3rem; font-weight: 800; margin-bottom: 10px; }
+        .header p { color: var(--text-secondary); font-size: 1.2rem; margin-bottom: 50px; }
+
+        /* Rule Cards (3D Glass) */
+        .rules-container { display: flex; flex-direction: column; gap: 24px; perspective: 1000px; }
+
+        .rule-card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.6s ease forwards;
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        @keyframes slideUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .rule-card:hover {
+            transform: translateY(-5px) scale(1.01);
+            border-color: rgba(139, 92, 246, 0.5);
+            box-shadow: 0 15px 40px -5px rgba(139, 92, 246, 0.3);
+        }
+
+        .rule-header {
+            padding: 24px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .rule-text {
+            font-size: 1.2rem;
+            font-weight: 400;
+            color: #e2e8f0;
+        }
+
+        /* Glowing Badge */
+        .badge {
+            background: rgba(139, 92, 246, 0.1);
+            color: #d8b4fe;
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            box-shadow: 0 0 10px rgba(139, 92, 246, 0.2);
+        }
+
+        .rule-meta-details {
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            background: rgba(0, 0, 0, 0.3);
+            transition: all 0.4s ease;
+        }
+
+        .rule-card:hover .rule-meta-details {
+            max-height: 250px;
+            opacity: 1;
+            padding: 24px 30px;
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .meta-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            font-size: 0.95rem;
+        }
+
+        .meta-item strong { color: white; display: block; margin-bottom: 6px; font-weight: 600; }
+        .meta-item span { color: var(--text-secondary); }
+
+        .delete-btn {
+            background: linear-gradient(45deg, #ef4444, #b91c1c);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+        }
+
+        .delete-btn:hover { transform: scale(1.05); box-shadow: 0 6px 20px rgba(239, 68, 68, 0.5); }
+
+        /* Tabs Logic */
+        .tab-content { display: none; animation: fadeIn 0.5s ease; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body>
+
+    <!-- Animated Background Orbs -->
+    <div class="bg-orb orb-1"></div>
+    <div class="bg-orb orb-2"></div>
+    <div class="bg-orb orb-3"></div>
+
+    <aside class="sidebar">
+        <div class="brand">
+            <h1>DevLore</h1>
+        </div>
+        <a class="nav-item active" onclick="switchTab('rules')">📋 Knowledge Base</a>
+        <a class="nav-item" onclick="switchTab('prs')">🔄 PR Integrations</a>
+        <a class="nav-item" onclick="switchTab('settings')">⚙️ Configurations</a>
+    </aside>
+
+    <main class="main-content">
+        <div id="rules-tab" class="tab-content active">
+            <div class="header">
+                <h2>Team Memory</h2>
+                <p>Tribal knowledge passively extracted from your team's code reviews.</p>
+            </div>
+            <div class="rules-container" id="dashboard">
+                <div style="color: var(--text-secondary); font-size: 1.2rem; text-align: center; padding: 50px;">
+                    <div style="animation: shine 2s infinite alternate;">Connecting to Hindsight Vector DB...</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="prs-tab" class="tab-content">
+            <div class="header">
+                <h2>Pull Request Integrations</h2>
+                <p>History of automated coaching interventions.</p>
+            </div>
+            <div class="rules-container" id="pr-history">
+                <div style="color: var(--text-secondary); font-size: 1.2rem; text-align: center; padding: 50px;">
+                    <div style="animation: shine 2s infinite alternate;">Fetching historical reviews...</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="settings-tab" class="tab-content">
+            <div class="header">
+                <h2>System Configurations</h2>
+                <p>Manage API keys and Webhook settings.</p>
+            </div>
+            <div style="padding: 60px; border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; background: rgba(0,0,0,0.2); backdrop-filter: blur(10px);">
+                <p style="color: #10b981; font-weight: 600; font-size: 1.2rem; margin-bottom: 10px;">✅ Hindsight API Connected</p>
+                <p style="color: #10b981; font-weight: 600; font-size: 1.2rem;">✅ GitHub Webhook Active</p>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabName + '-tab').classList.add('active');
+            event.currentTarget.classList.add('active');
+        }
+
+        function extractAuthor(text) {
+            const match = text.match(/Involving:\s*(\w+)/i) || text.match(/by\s*(\w+)/i);
+            return match ? match[1] : 'Lead Developer';
+        }
+
+        async function fetchRules() {
+            try {
+                const response = await fetch('/api/rules');
+                const data = await response.json();
+                
+                const dashboard = document.getElementById('dashboard');
+                const prHistory = document.getElementById('pr-history');
+                
+                dashboard.innerHTML = '';
+                prHistory.innerHTML = '';
+
+                if (!data.rules || data.rules.length === 0) {
+                    dashboard.innerHTML = '<div style="color: var(--text-secondary); text-align: center; padding: 50px;">No memory banks found.</div>';
+                    prHistory.innerHTML = '<div style="color: var(--text-secondary); text-align: center; padding: 50px;">No PR history found.</div>';
+                    return;
+                }
+
+                let ruleCount = 0;
+                let historyCount = 0;
+
+                data.rules.forEach((rule, index) => {
+                    const cleanText = rule.text.replace(/\| Involving:.*?\|.*?$/, '').replace(/^.*?: "/, '').replace(/"$/, '');
+                    
+                    // Hindsight summarized the comment, so we need to catch its summary format
+                    const isBotComment = cleanText.includes('requested the removal of') || cleanText.includes('DevLore') || cleanText.includes('PR-Agent test');
+                    
+                    const author = extractAuthor(rule.text);
+                    const date = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
+                    const card = document.createElement('div');
+                    card.className = 'rule-card';
+                    card.style.animationDelay = `${index * 0.1}s`;
+                    
+                    if (isBotComment) {
+                        historyCount++;
+                        card.innerHTML = `
+                            <div class="rule-header">
+                                <div class="rule-text" style="color: #c084fc; font-weight: 600;">🤖 Automated PR Review Executed</div>
+                                <span class="badge" style="background: rgba(16, 185, 129, 0.1); color: #34d399; border-color: rgba(16, 185, 129, 0.3);">Coached</span>
+                            </div>
+                            <div class="rule-meta-details">
+                                <div style="margin-bottom: 20px; color: #e2e8f0; font-style: italic; line-height: 1.6;">"${cleanText.trim()}"</div>
+                                <div class="meta-grid">
+                                    <div class="meta-item">
+                                        <strong>Target PR</strong>
+                                        <a href="https://github.com/ShivaGundeti/Dum-Dev/pulls" target="_blank" style="color: #60a5fa; text-decoration: none;">View on GitHub ↗</a>
+                                    </div>
+                                    <div class="meta-item">
+                                        <strong>Execution Date</strong>
+                                        <span>${date}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        prHistory.appendChild(card);
+                    } else {
+                        ruleCount++;
+                        card.innerHTML = `
+                            <div class="rule-header">
+                                <div class="rule-text">"${cleanText.trim()}"</div>
+                                <span class="badge">Retained</span>
+                            </div>
+                            <div class="rule-meta-details">
+                                <div class="meta-grid">
+                                    <div class="meta-item">
+                                        <strong>Author</strong>
+                                        <span>${author}</span>
+                                    </div>
+                                    <div class="meta-item">
+                                        <strong>Learned On</strong>
+                                        <span>${date} via GitHub</span>
+                                    </div>
+                                    <div class="meta-item">
+                                        <strong>Source Context</strong>
+                                        <a href="https://github.com/ShivaGundeti/Dum-Dev/pulls" target="_blank" style="color: #c084fc; text-decoration: none; font-weight: 500;">View Pull Request ↗</a>
+                                    </div>
+                                    <div class="meta-item" style="text-align: right; display: flex; justify-content: flex-end; align-items: flex-end;">
+                                        <button class="delete-btn" onclick="alert('This triggers a deletion webhook to Hindsight in production.')">Forget Rule</button>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        dashboard.appendChild(card);
+                    }
+                });
+
+                if (ruleCount === 0) dashboard.innerHTML = '<div style="color: var(--text-secondary); text-align: center; padding: 50px;">No memory banks found.</div>';
+                if (historyCount === 0) prHistory.innerHTML = '<div style="color: var(--text-secondary); text-align: center; padding: 50px;">No PR history found.</div>';
+
+            } catch (error) {
+                document.getElementById('dashboard').innerHTML = '<div style="color: var(--danger); text-align: center; padding: 50px;">Database connection failed.</div>';
+            }
+        }
+
+        fetchRules();
+    </script>
+</body>
+</html>

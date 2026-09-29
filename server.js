@@ -12,6 +12,18 @@ const client = new HindsightClient({
 });
 
 app.use(express.json());
+// Serve the frontend dashboard
+app.use(express.static('public'));
+
+// Endpoint for the Dashboard to fetch memories
+app.get('/api/rules', async (req, res) => {
+    try {
+        const response = await client.recall(BANK_NAME, 'team rules and coding standards');
+        res.json({ rules: response.results || [] });
+    } catch (error) {
+        res.status(500).json({ rules: [] });
+    }
+});
 
 app.post('/webhook', async (req, res) => {
     const event = req.headers['x-github-event'];
