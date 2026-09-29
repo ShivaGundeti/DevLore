@@ -15,6 +15,7 @@
     "@vectorize-io/hindsight-client": "^0.10.1",
     "dotenv": "^18.0.4",
     "express": "^5.2.1",
+    "octokit": "^5.0.5",
     "ts-node": "^10.9.2",
     "typescript": "^7.0.2"
   },
